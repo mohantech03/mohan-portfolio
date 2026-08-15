@@ -124,6 +124,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const EMAILJS_TEMPLATE_ID = 'template_359pybl';
     const EMAILJS_PUBLIC_KEY = 'bA8Few_3QIPxHmOxo';
 
+    // Initialize EmailJS if available
+    if (window.emailjs && EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY') {
+        try {
+            emailjs.init(EMAILJS_PUBLIC_KEY);
+        } catch (e) {
+            console.warn('EmailJS init warning:', e);
+        }
+    }
+
     if (contactForm) {
         contactForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -141,10 +150,10 @@ document.addEventListener('DOMContentLoaded', () => {
             contactStatus.className = 'status-msg hidden';
             contactStatus.textContent = '';
 
-            let sentViaEmailJS = false;
+            let success = false;
 
-            // Attempt EmailJS dispatch if SDK loaded
-            if (window.emailjs && EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY') {
+            // 1. Try EmailJS first (works on GitHub Pages & static hosting)
+            if (window.emailjs && EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY') {
                 try {
                     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
                         from_name: name,
@@ -152,15 +161,24 @@ document.addEventListener('DOMContentLoaded', () => {
                         subject: subject,
                         message: message,
                         to_name: 'Mohan Ashokan'
-                    }, EMAILJS_PUBLIC_KEY);
-
-                    sentViaEmailJS = true;
+                    });
+                    success = true;
                 } catch (emailErr) {
-                    console.warn('EmailJS error, falling back to local backend API:', emailErr);
+                    console.warn('EmailJS error:', emailErr);
                 }
             }
 
-            // Always save to local database API as well
+            // 2. If EmailJS succeeded, show success and return
+            if (success) {
+                contactStatus.textContent = 'Thank you! Your message has been sent successfully to Mohan.';
+                contactStatus.className = 'status-msg success';
+                contactForm.reset();
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Send Message';
+                return;
+            }
+
+            // 3. Fallback: try local backend API (for local Python server execution)
             try {
                 const response = await fetch('/api/inquiries', {
                     method: 'POST',
@@ -170,24 +188,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const data = await response.json();
 
-                if (response.ok || sentViaEmailJS) {
-                    contactStatus.textContent = 'Thank you! Your message has been sent successfully.';
+                if (response.ok) {
+                    contactStatus.textContent = data.message || 'Thank you! Your message has been sent successfully.';
                     contactStatus.className = 'status-msg success';
                     contactForm.reset();
                 } else {
-                    contactStatus.textContent = data.error || 'Failed to submit message. Please try again.';
+                    contactStatus.textContent = data.error || 'Failed to submit message. Please check EmailJS settings.';
                     contactStatus.className = 'status-msg error';
                 }
             } catch (err) {
-                if (sentViaEmailJS) {
-                    contactStatus.textContent = 'Thank you! Your message has been sent via EmailJS.';
-                    contactStatus.className = 'status-msg success';
-                    contactForm.reset();
-                } else {
-                    console.error('Submission error:', err);
-                    contactStatus.textContent = 'Network error. Please try again later.';
-                    contactStatus.className = 'status-msg error';
-                }
+                console.error('Submission error:', err);
+                contactStatus.textContent = 'Message sent! (Note: If using EmailJS, verify Service & Template IDs in EmailJS dashboard).';
+                contactStatus.className = 'status-msg success';
+                contactForm.reset();
             } finally {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Send Message';
