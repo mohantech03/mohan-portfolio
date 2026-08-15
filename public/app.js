@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 1. Try EmailJS first (works on GitHub Pages & static hosting)
             if (window.emailjs && EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY') {
                 try {
-                    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+                    const result = await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
                         from_name: name,
                         name: name,
                         user_name: name,
@@ -168,9 +168,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         message: message,
                         to_name: 'Mohan Ashokan'
                     });
+                    console.log('EmailJS Success:', result);
                     success = true;
                 } catch (emailErr) {
-                    console.warn('EmailJS error:', emailErr);
+                    console.error('EmailJS error detail:', emailErr);
+                    const errDetail = emailErr.text || emailErr.message || (typeof emailErr === 'string' ? emailErr : JSON.stringify(emailErr));
+                    contactStatus.textContent = `EmailJS Error (${emailErr.status || 400}): ${errDetail}`;
+                    contactStatus.className = 'status-msg error';
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Send Message';
+                    return;
                 }
             }
 
