@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // EmailJS Configuration
     const EMAILJS_SERVICE_ID = 'service_5okarli';
-    const EMAILJS_TEMPLATE_ID = 'template_359pybl';
+    const EMAILJS_TEMPLATE_ID = 'template_uiq7k67';
     const EMAILJS_PUBLIC_KEY = 'bA8Few_3QIPxHmOxo';
 
     // Initialize EmailJS if available
