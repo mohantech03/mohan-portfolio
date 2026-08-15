@@ -157,8 +157,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
                         from_name: name,
+                        name: name,
+                        user_name: name,
                         from_email: email,
+                        email: email,
+                        user_email: email,
+                        reply_to: email,
                         subject: subject,
+                        title: subject,
                         message: message,
                         to_name: 'Mohan Ashokan'
                     });
