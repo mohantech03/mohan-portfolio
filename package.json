@@ -1,0 +1,17 @@
+{
+    "name": "mohan-profile",
+    "version": "1.0.0",
+    "description": "Mohan Ashokan Professional Developer Portfolio",
+    "main": "server.py",
+    "scripts": {
+        "start": "python server.py",
+        "dev": "python server.py"
+    },
+    "keywords": [
+        "portfolio",
+        "mohan-ashokan",
+        "developer"
+    ],
+    "author": "Mohan Ashokan",
+    "license": "ISC"
+}
