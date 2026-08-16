@@ -237,38 +237,66 @@ document.addEventListener('DOMContentLoaded', () => {
         adminLoginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const user = document.getElementById('admin-user').value;
-            const pass = document.getElementById('admin-pass').value;
+            const user = document.getElementById('admin-user').value.trim();
+            const pass = document.getElementById('admin-pass').value.trim();
 
             adminAuthMsg.className = 'status-msg hidden';
             adminAuthMsg.textContent = '';
 
-            // Construct Basic Auth Header string
-            const credsBase64 = btoa(`${user}:${pass}`);
+            // Check hardcoded credentials for static hosting (GitHub Pages)
+            if (user === 'admin' && pass === 'password123') {
+                adminCredentials = btoa(`${user}:${pass}`);
+                adminAuthPanel.classList.add('hidden');
+                adminDashboard.classList.remove('hidden');
 
+                // Try fetching live backend inquiries if available
+                try {
+                    const response = await fetch('/api/admin/inquiries', {
+                        headers: { 'Authorization': `Basic ${adminCredentials}` }
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        renderInquiriesTable(data);
+                        return;
+                    }
+                } catch (err) {
+                    console.log('Backend not reachable, showing static admin mode');
+                }
+
+                // Default demonstration dataset for static GitHub Pages
+                renderInquiriesTable([
+                    {
+                        id: 101,
+                        name: "Sample Client",
+                        email: "client@example.com",
+                        subject: "Full-Stack Project Inquiry",
+                        message: "Hi Mohan, interested in discussing a web application development project.",
+                        status: "Active",
+                        created_at: new Date().toISOString()
+                    }
+                ]);
+                return;
+            }
+
+            // Try backend API authentication
+            const credsBase64 = btoa(`${user}:${pass}`);
             try {
                 const response = await fetch('/api/admin/inquiries', {
-                    headers: {
-                        'Authorization': `Basic ${credsBase64}`
-                    }
+                    headers: { 'Authorization': `Basic ${credsBase64}` }
                 });
 
                 if (response.ok) {
                     const data = await response.json();
-                    adminCredentials = credsBase64; // Save successful authorization
-
-                    // Show dashboard
+                    adminCredentials = credsBase64;
                     adminAuthPanel.classList.add('hidden');
                     adminDashboard.classList.remove('hidden');
-
                     renderInquiriesTable(data);
                 } else {
-                    adminAuthMsg.textContent = 'Invalid administrative credentials.';
+                    adminAuthMsg.textContent = 'Invalid administrative credentials. Use admin / password123';
                     adminAuthMsg.className = 'status-msg error';
                 }
             } catch (err) {
-                console.error('Admin fetch error:', err);
-                adminAuthMsg.textContent = 'Error connecting to database. Is backend server running?';
+                adminAuthMsg.textContent = 'Invalid administrative credentials. Use admin / password123';
                 adminAuthMsg.className = 'status-msg error';
             }
         });
