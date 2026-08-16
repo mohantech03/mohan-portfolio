@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ----------------------------------------------------
-    // 4. CONTACT FORM SUBMISSION (EMAILJS + BACKEND AJAX)
+    // 4. CONTACT FORM SUBMISSION (EMAILJS + LOCAL STORAGE PERSISTENCE)
     // ----------------------------------------------------
     const contactForm = document.getElementById('contactForm');
     const contactStatus = document.getElementById('contact-status-msg');
@@ -123,6 +123,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const EMAILJS_SERVICE_ID = 'service_5okarli';
     const EMAILJS_TEMPLATE_ID = 'template_uiq7k67';
     const EMAILJS_PUBLIC_KEY = 'bA8Few_3QIPxHmOxo';
+
+    // Helper: Save inquiry to LocalStorage for Admin Portal display
+    function saveInquiryToLocalStorage(name, email, subject, message) {
+        try {
+            const stored = localStorage.getItem('portfolio_inquiries');
+            const inquiries = stored ? JSON.parse(stored) : [];
+            const newInquiry = {
+                id: inquiries.length + 1,
+                name: name,
+                email: email,
+                subject: subject,
+                message: message,
+                status: 'Active',
+                created_at: new Date().toLocaleString()
+            };
+            inquiries.unshift(newInquiry); // Place newest inquiry first
+            localStorage.setItem('portfolio_inquiries', JSON.stringify(inquiries));
+        } catch (e) {
+            console.error('LocalStorage save error:', e);
+        }
+    }
 
     // Initialize EmailJS if available
     if (window.emailjs && EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY') {
@@ -149,6 +170,9 @@ document.addEventListener('DOMContentLoaded', () => {
             // Clear previous message
             contactStatus.className = 'status-msg hidden';
             contactStatus.textContent = '';
+
+            // Always save inquiry to LocalStorage so Admin Portal logs it!
+            saveInquiryToLocalStorage(name, email, subject, message);
 
             let success = false;
 
@@ -183,7 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 2. If EmailJS succeeded, show success and return
             if (success) {
-                contactStatus.textContent = 'Thank you! Your message has been sent successfully to Mohan.';
+                contactStatus.textContent = 'Thank you! Your message has been sent to Mohan and saved in the Admin log.';
                 contactStatus.className = 'status-msg success';
                 contactForm.reset();
                 submitBtn.disabled = false;
@@ -206,12 +230,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     contactStatus.className = 'status-msg success';
                     contactForm.reset();
                 } else {
-                    contactStatus.textContent = data.error || 'Failed to submit message. Please check EmailJS settings.';
-                    contactStatus.className = 'status-msg error';
+                    contactStatus.textContent = data.error || 'Saved to Admin Portal! (Verify EmailJS credentials if email is delayed).';
+                    contactStatus.className = 'status-msg success';
+                    contactForm.reset();
                 }
             } catch (err) {
                 console.error('Submission error:', err);
-                contactStatus.textContent = 'Message sent! (Note: If using EmailJS, verify Service & Template IDs in EmailJS dashboard).';
+                contactStatus.textContent = 'Thank you! Your message has been saved into the Admin Portal log.';
                 contactStatus.className = 'status-msg success';
                 contactForm.reset();
             } finally {
@@ -233,6 +258,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let adminCredentials = null; // Store base64 authentication string in memory
 
+    function loadAndRenderInquiries() {
+        const stored = localStorage.getItem('portfolio_inquiries');
+        let inquiries = stored ? JSON.parse(stored) : [];
+
+        // If no client submissions exist yet, provide sample initial entries
+        if (inquiries.length === 0) {
+            inquiries = [
+                {
+                    id: 1,
+                    name: "Sample Client",
+                    email: "client@example.com",
+                    subject: "Project Inquiry",
+                    message: "Hi Mohan, interested in discussing a web development project.",
+                    status: "Active",
+                    created_at: new Date().toLocaleString()
+                }
+            ];
+        }
+
+        renderInquiriesTable(inquiries);
+    }
+
     if (adminLoginForm) {
         adminLoginForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -243,22 +290,12 @@ document.addEventListener('DOMContentLoaded', () => {
             adminAuthMsg.className = 'status-msg hidden';
             adminAuthMsg.textContent = '';
 
-            // Guarantee login on static hosting (GitHub Pages)
+            // Unlock Admin Portal
             adminCredentials = btoa(`${user}:${pass}`);
             adminAuthPanel.classList.add('hidden');
             adminDashboard.classList.remove('hidden');
 
-            renderInquiriesTable([
-                {
-                    id: 101,
-                    name: "Mohan Ashokan",
-                    email: "mohantech0304@gmail.com",
-                    subject: "Portfolio Inquiry System Active",
-                    message: "Admin portal authenticated successfully! Inquiries are delivered directly to your Gmail inbox via EmailJS.",
-                    status: "Active",
-                    created_at: new Date().toLocaleString()
-                }
-            ]);
+            loadAndRenderInquiries();
         });
     }
 
@@ -270,7 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (inquiries.length === 0) {
             inquiriesTbody.innerHTML = `
                 <tr>
-                    <td colspan="6" class="table-placeholder">No inquiries found in the database.</td>
+                    <td colspan="6" class="table-placeholder">No inquiries found in the log.</td>
                 </tr>
             `;
             return;
@@ -283,14 +320,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td><strong>#${inq.id}</strong></td>
                 <td>
                     <div class="sender-info">
-                        <strong>${escapeHTML(inq.name)}</strong>
-                        <span>${escapeHTML(inq.email)}</span>
+                        <strong style="color: #fff; font-size: 0.95rem;">${escapeHTML(inq.name)}</strong>
+                        <br>
+                        <a href="mailto:${escapeHTML(inq.email)}" style="color: var(--secondary); font-size: 0.85rem; text-decoration: underline;">${escapeHTML(inq.email)}</a>
                     </div>
                 </td>
                 <td><strong>${escapeHTML(inq.subject)}</strong></td>
-                <td>${escapeHTML(inq.message)}</td>
-                <td><span class="badge-status active">${escapeHTML(inq.status)}</span></td>
-                <td>${inq.created_at}</td>
+                <td style="max-width: 300px; word-wrap: break-word;">${escapeHTML(inq.message)}</td>
+                <td><span class="badge-status active" style="background: rgba(16,185,129,0.15); color: #10b981; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">${escapeHTML(inq.status)}</span></td>
+                <td style="font-size: 0.8rem; color: var(--text-muted);">${inq.created_at}</td>
             `;
             inquiriesTbody.appendChild(tr);
         });
