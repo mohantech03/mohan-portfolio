@@ -1,5 +1,71 @@
 document.addEventListener('DOMContentLoaded', () => {
     // ----------------------------------------------------
+    // 0. OPTION 2: DEEP NEON CIRCUIT NODE CANVAS ANIMATION
+    // ----------------------------------------------------
+    const canvas = document.getElementById('tech-canvas');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        const particles = [];
+        const particleCount = Math.min(Math.floor(width / 25), 50);
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                vx: (Math.random() - 0.5) * 0.5,
+                vy: (Math.random() - 0.5) * 0.5,
+                radius: Math.random() * 2 + 1,
+                color: Math.random() > 0.4 ? '#10b981' : (Math.random() > 0.5 ? '#06b6d4' : '#8b5cf6')
+            });
+        }
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, width, height);
+
+            for (let i = 0; i < particles.length; i++) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+
+                if (p.x < 0 || p.x > width) p.vx *= -1;
+                if (p.y < 0 || p.y > height) p.vy *= -1;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.fill();
+
+                // Draw circuit connections between nearby nodes
+                for (let j = i + 1; j < particles.length; j++) {
+                    const p2 = particles[j];
+                    const dx = p.x - p2.x;
+                    const dy = p.y - p2.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 130) {
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = `rgba(16, 185, 129, ${0.22 * (1 - dist / 130)})`;
+                        ctx.lineWidth = 0.8;
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animateCanvas);
+        }
+        animateCanvas();
+    }
+
+    // ----------------------------------------------------
     // 1. SCROLL NAVIGATION & SCROLL SPY
     // ----------------------------------------------------
     const navLinks = document.querySelectorAll('.nav-link');
@@ -15,19 +81,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const targetId = link.getAttribute('data-tab');
             const targetElement = document.getElementById(targetId);
             if (targetElement) {
-                // If mobile nav is open, close it
                 if (navMenu && navMenu.classList.contains('show')) {
                     navMenu.classList.remove('show');
                 }
 
                 targetElement.scrollIntoView({ behavior: 'smooth' });
-                // Push hash state without scrolling jump
                 history.pushState(null, null, `#${targetId}`);
             }
         });
     });
 
-    // Smooth scroll on trigger CTA clicks (e.g. "Explore Projects")
+    // Smooth scroll on trigger CTA clicks
     tabTriggers.forEach(trigger => {
         trigger.addEventListener('click', (e) => {
             e.preventDefault();
@@ -43,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Scroll Spy using IntersectionObserver
     const observerOptions = {
         root: null,
-        rootMargin: '-40% 0px -50% 0px', // check if section is in middle of viewport
+        rootMargin: '-40% 0px -50% 0px',
         threshold: 0
     };
 
@@ -95,13 +159,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     filterButtons.forEach(button => {
         button.addEventListener('click', () => {
-            // Update active button styling
             filterButtons.forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
 
             const filterValue = button.getAttribute('data-filter');
 
-            // Toggle project card visibility
             projectCards.forEach(card => {
                 const category = card.getAttribute('data-category');
                 if (filterValue === 'all' || category === filterValue) {
@@ -119,12 +181,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const contactForm = document.getElementById('contactForm');
     const contactStatus = document.getElementById('contact-status-msg');
 
-    // EmailJS Configuration
     const EMAILJS_SERVICE_ID = 'service_5okarli';
     const EMAILJS_TEMPLATE_ID = 'template_uiq7k67';
     const EMAILJS_PUBLIC_KEY = 'bA8Few_3QIPxHmOxo';
 
-    // Helper: Save inquiry to LocalStorage for Admin Portal display
     function saveInquiryToLocalStorage(name, email, subject, message) {
         try {
             const stored = localStorage.getItem('portfolio_inquiries');
@@ -138,14 +198,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 status: 'Active',
                 created_at: new Date().toLocaleString()
             };
-            inquiries.unshift(newInquiry); // Place newest inquiry first
+            inquiries.unshift(newInquiry);
             localStorage.setItem('portfolio_inquiries', JSON.stringify(inquiries));
         } catch (e) {
             console.error('LocalStorage save error:', e);
         }
     }
 
-    // Initialize EmailJS if available
     if (window.emailjs && EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY') {
         try {
             emailjs.init(EMAILJS_PUBLIC_KEY);
@@ -167,16 +226,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const subject = document.getElementById('form-subject').value;
             const message = document.getElementById('form-message').value;
 
-            // Clear previous message
             contactStatus.className = 'status-msg hidden';
             contactStatus.textContent = '';
 
-            // Always save inquiry to LocalStorage so Admin Portal logs it!
             saveInquiryToLocalStorage(name, email, subject, message);
 
             let success = false;
 
-            // 1. Try EmailJS first (works on GitHub Pages & static hosting)
             if (window.emailjs && EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== 'YOUR_PUBLIC_KEY') {
                 try {
                     const result = await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
@@ -205,7 +261,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // 2. If EmailJS succeeded, show success and return
             if (success) {
                 contactStatus.textContent = 'Thank you! Your message has been sent to Mohan and saved in the Admin log.';
                 contactStatus.className = 'status-msg success';
@@ -215,7 +270,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // 3. Fallback: try local backend API (for local Python server execution)
             try {
                 const response = await fetch('/api/inquiries', {
                     method: 'POST',
@@ -256,13 +310,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const inquiriesTbody = document.getElementById('inquiries-tbody');
     const logoutBtn = document.getElementById('admin-logout-btn');
 
-    let adminCredentials = null; // Store base64 authentication string in memory
+    let adminCredentials = null;
 
     function loadAndRenderInquiries() {
         const stored = localStorage.getItem('portfolio_inquiries');
         let inquiries = stored ? JSON.parse(stored) : [];
 
-        // If no client submissions exist yet, provide sample initial entries
         if (inquiries.length === 0) {
             inquiries = [
                 {
@@ -290,7 +343,6 @@ document.addEventListener('DOMContentLoaded', () => {
             adminAuthMsg.className = 'status-msg hidden';
             adminAuthMsg.textContent = '';
 
-            // Unlock Admin Portal
             adminCredentials = btoa(`${user}:${pass}`);
             adminAuthPanel.classList.add('hidden');
             adminDashboard.classList.remove('hidden');
@@ -322,7 +374,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="sender-info">
                         <strong style="color: #fff; font-size: 0.95rem;">${escapeHTML(inq.name)}</strong>
                         <br>
-                        <a href="mailto:${escapeHTML(inq.email)}" style="color: var(--secondary); font-size: 0.85rem; text-decoration: underline;">${escapeHTML(inq.email)}</a>
+                        <a href="mailto:${escapeHTML(inq.email)}" style="color: var(--primary); font-size: 0.85rem; text-decoration: underline;">${escapeHTML(inq.email)}</a>
                     </div>
                 </td>
                 <td><strong>${escapeHTML(inq.subject)}</strong></td>
@@ -339,7 +391,6 @@ document.addEventListener('DOMContentLoaded', () => {
             adminCredentials = null;
             adminLoginForm.reset();
 
-            // Reset to Auth panel
             adminDashboard.classList.add('hidden');
             adminAuthPanel.classList.remove('hidden');
         });

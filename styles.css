@@ -1,19 +1,22 @@
 /* ====================================================
-   MOHAN ASHOKAN - PORTFOLIO DESIGN SYSTEM & STYLESHEET
-   Aesthetics: Modern Dark Mode, Glassmorphism, HSL tailwinds
+   MOHAN ASHOKAN - PORTFOLIO DESIGN SYSTEM
+   Theme: Option 2 - Deep Neon Circuit & Node Network
    ==================================================== */
 
 :root {
-    --bg-dark: #0b0f19;
-    --bg-card: rgba(18, 24, 38, 0.7);
+    --bg-dark: #080a11;
+    --bg-card: rgba(13, 17, 28, 0.75);
     --bg-glass: rgba(255, 255, 255, 0.03);
-    --border-glass: rgba(255, 255, 255, 0.08);
-    --border-highlight: rgba(99, 102, 241, 0.3);
+    --border-glass: rgba(16, 185, 129, 0.12);
+    --border-highlight: rgba(16, 185, 129, 0.4);
 
-    --primary: #6366f1;
-    --primary-glow: rgba(99, 102, 241, 0.4);
+    --primary: #10b981;
+    /* Neon Emerald */
+    --primary-glow: rgba(16, 185, 129, 0.35);
     --secondary: #06b6d4;
-    --accent: #ec4899;
+    /* Cyber Cyan */
+    --accent: #8b5cf6;
+    /* Plasma Violet */
 
     --text-main: #f3f4f6;
     --text-muted: #9ca3af;
@@ -42,8 +45,7 @@
 html {
     scroll-behavior: smooth;
     font-family: var(--font-body);
-    background-color: #0b0f19 !important;
-    background-image: none !important;
+    background-color: var(--bg-dark);
     color: var(--text-main);
     overflow-x: hidden;
 }
@@ -52,31 +54,42 @@ body {
     min-height: 100vh;
     line-height: 1.6;
     position: relative;
-    background-color: #0b0f19 !important;
-    background-image: none !important;
+    background-color: var(--bg-dark);
+}
+
+/* Canvas Particle Node Network Overlay */
+#tech-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0.65;
 }
 
 /* Ambient Radial Glow Elements */
 .radial-glow {
     position: fixed;
     border-radius: 50%;
-    filter: blur(120px);
-    z-index: -1;
+    filter: blur(140px);
+    z-index: -2;
     pointer-events: none;
 }
 
 .glow-1 {
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+    width: 550px;
+    height: 550px;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, transparent 70%);
     top: -100px;
     left: -100px;
 }
 
 .glow-2 {
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, transparent 70%);
+    width: 650px;
+    height: 650px;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.2) 0%, transparent 70%);
     bottom: -150px;
     right: -150px;
 }
@@ -107,7 +120,7 @@ body {
     justify-content: space-between;
     align-items: center;
     padding: 0 5%;
-    background: rgba(11, 15, 25, 0.85);
+    background: rgba(8, 10, 17, 0.88);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border-glass);
@@ -146,16 +159,16 @@ body {
 .nav-link:hover,
 .nav-link.active {
     color: #fff;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(16, 185, 129, 0.1);
 }
 
 .admin-btn {
     border: 1px solid var(--border-highlight);
-    color: var(--secondary) !important;
+    color: var(--primary) !important;
 }
 
 .admin-btn:hover {
-    background: rgba(6, 182, 212, 0.1) !important;
+    background: rgba(16, 185, 129, 0.15) !important;
 }
 
 /* Mobile Toggle Hamburger */
@@ -221,15 +234,16 @@ body {
 
 /* Typography & Gradient Effects */
 .text-gradient {
-    background: linear-gradient(135deg, #fff 0%, var(--primary) 50%, var(--secondary) 100%);
+    background: linear-gradient(135deg, #ffffff 0%, #10b981 50%, #06b6d4 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
 .badge {
     display: inline-block;
     padding: 6px 14px;
-    background: rgba(99, 102, 241, 0.1);
+    background: rgba(16, 185, 129, 0.12);
     border: 1px solid var(--border-highlight);
     border-radius: 50px;
     color: var(--primary);
@@ -257,8 +271,8 @@ body {
 
 .sub-headline {
     font-size: 1.3rem;
-    color: var(--text-muted);
-    font-weight: 400;
+    color: #6ee7b7;
+    font-weight: 500;
     margin-bottom: 1.5rem;
 }
 
@@ -290,14 +304,14 @@ body {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%);
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: #fff;
     box-shadow: 0 4px 20px var(--primary-glow);
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px var(--primary-glow);
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
 }
 
 .btn-secondary {
@@ -307,8 +321,8 @@ body {
 }
 
 .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(16, 185, 129, 0.1);
+    border-color: var(--border-highlight);
 }
 
 .btn-block {
@@ -339,7 +353,7 @@ body {
 .social-pill:hover {
     color: #fff;
     border-color: var(--border-highlight);
-    background: rgba(99, 102, 241, 0.1);
+    background: rgba(16, 185, 129, 0.1);
 }
 
 /* HERO RIGHT - Aesthetic Display Panel */
@@ -349,7 +363,7 @@ body {
     border-radius: var(--radius-lg);
     padding: 2rem;
     position: relative;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
 }
 
 .tech-stack-dynamic {
@@ -369,9 +383,9 @@ body {
 }
 
 .node.active {
-    border-color: var(--secondary);
-    color: var(--secondary);
-    background: rgba(6, 182, 212, 0.1);
+    border-color: var(--primary);
+    color: var(--primary);
+    background: rgba(16, 185, 129, 0.12);
 }
 
 .core-objective-panel h3 {
@@ -400,6 +414,7 @@ body {
     height: 8px;
     border-radius: 50%;
     background: var(--primary);
+    box-shadow: 0 0 8px var(--primary);
 }
 
 /* ABOUT & EXPERIENCE SECTION */
@@ -439,6 +454,7 @@ body {
     justify-content: center;
     font-weight: 700;
     font-family: var(--font-heading);
+    color: #fff;
 }
 
 .company-name {
@@ -485,7 +501,7 @@ body {
 
 .timeline-date {
     font-size: 0.8rem;
-    color: var(--secondary);
+    color: var(--primary);
     font-weight: 600;
 }
 
@@ -505,9 +521,9 @@ body {
     display: inline-block;
     font-size: 0.8rem;
     padding: 2px 8px;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(16, 185, 129, 0.1);
     border-radius: 4px;
-    color: var(--text-main);
+    color: #6ee7b7;
 }
 
 /* SKILLS SECTION */
@@ -542,6 +558,13 @@ body {
     border-radius: 6px;
     font-size: 0.85rem;
     color: var(--text-muted);
+    transition: all var(--transition-fast);
+}
+
+.skill-tag:hover {
+    border-color: var(--primary);
+    color: #6ee7b7;
+    background: rgba(16, 185, 129, 0.1);
 }
 
 .certifications-section {
@@ -627,7 +650,7 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(6, 182, 212, 0.2));
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(139, 92, 246, 0.2));
     border-bottom: 1px solid var(--border-glass);
 }
 
@@ -660,9 +683,10 @@ body {
 .tag {
     font-size: 0.75rem;
     padding: 2px 8px;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(16, 185, 129, 0.08);
     border-radius: 4px;
-    color: var(--text-muted);
+    color: #6ee7b7;
+    border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
 .project-info h4 {
@@ -776,7 +800,7 @@ body {
 .form-group textarea {
     width: 100%;
     padding: 12px 16px;
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.4);
     border: 1px solid var(--border-glass);
     border-radius: var(--radius-sm);
     color: #fff;
@@ -907,7 +931,7 @@ body {
         top: 70px;
         left: 0;
         width: 100%;
-        background: rgba(11, 15, 25, 0.95);
+        background: rgba(8, 10, 17, 0.96);
         backdrop-filter: blur(20px);
         flex-direction: column;
         padding: 2rem;
